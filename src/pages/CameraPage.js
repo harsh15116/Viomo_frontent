@@ -182,7 +182,6 @@ function CameraPage() {
                     {audioURL && (
                       <div>
                         {/* <button onClick={playAudio}>Play Audio</button> */}
-                        <audio src={audioURL} controls />
                         <button
                           onClick={downloadAudio}
                           className="download-button"
@@ -237,11 +236,10 @@ function CameraPage() {
                     onChange={handleAudioUpload}
                     style={{ display: "none" }}
                   />
-
-                  {audioURL && <AudioWaveform fileUrl={audioURL} />}
                 </div>
               )}
             </div>
+            {audioURL && <AudioWaveform fileUrl={audioURL} />}
           </div>
           <div className="Form-group">
             <div className="inline-flex">
