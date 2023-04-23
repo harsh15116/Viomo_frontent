@@ -1,23 +1,22 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import "./CameraPage.css";
 import Sidenav from "./Sidenav";
-import Recorder from "./Recorder";
-import AudioRecorder from "./AudioRecorder";
+import { Backdrop } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import artist from "../assests/Artists";
+import AudioWaveform from "../components/AudioWave";
 function CameraPage() {
-  const [audioFile, setAudioFile] = useState(null);
-  const [theme, setTheme] = useState("");
+  const [theme, setTheme] = useState([]);
   const [option, setOption] = useState("music");
   const [option1, setOption1] = useState("");
   const [upscale, setUpscale] = useState(false);
-
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    setAudioFile(file);
-  };
+  const [loading, setLoading] = useState(false);
+  const audioInputRef = useRef(null);
 
   const handleThemeClick = (selectedTheme) => {
-    setTheme(selectedTheme);
+    if (theme.includes(selectedTheme))
+      setTheme(theme.filter((theme) => theme !== selectedTheme));
+    else setTheme((prev) => [...prev, selectedTheme]);
   };
   const handleradioButton = (option) => {
     setOption1(option);
@@ -33,8 +32,8 @@ function CameraPage() {
     setUpscale(checked);
   };
 
-  var myArray = artist
-  
+  var myArray = artist;
+
   //audio recorder function
   const [recording, setRecording] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
@@ -59,6 +58,13 @@ function CameraPage() {
 
         recorder.addEventListener("stop", () => {
           const blob = new Blob(chunks);
+          const file = new File([blob], "recording.wav", { type: "audio/wav" });
+          // audioInputRef.current.files = [file];
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(file);
+
+          const fileList = dataTransfer.files;
+          audioInputRef.current.files = fileList;
           const url = URL.createObjectURL(blob);
           setAudioURL(url);
         });
@@ -98,50 +104,91 @@ function CameraPage() {
     const audio = new Audio(audioURL);
     audio.play();
   };
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const audio = new Audio(audioURL);
-    console.log(audio, "audio");
-    console.log("theme id--", theme);
-    console.log("options--", option);
-    console.log("upscale--", upscale);
+  // console.log(audioURL)
+  const handleSubmit = async (event) => {
+    event.preventDefault(); // prevent the default form submission behavior
+    const formData = new FormData(event.target); // get the form data
+    const url = "https://5261-34-145-164-107.ngrok-free.app/save-audio-file"; // replace this with your URL
+    console.log(url);
+    setLoading(true);
+    await fetch(url, {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => {
+        // The response object contains metadata about the file
+        const filename = "temp.mp4";
+        // Use the blob() method to extract the file content as a Blob object
+        return response.blob().then((blob) => ({ filename, blob }));
+      })
+      .then((file) => {
+        // Use URL.createObjectURL() to generate a URL for the file content
+        const url = URL.createObjectURL(file.blob);
+        // Create an <a> element and programmatically click it to download the file
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    setLoading(false);
   };
+
   return (
     <>
       <Sidenav />
       <div className="Form">
-        <div className="heading">Create your own music</div>
-        <form onSubmit={handleSubmit}>
+        <Backdrop open={loading}>
+          <CircularProgress color="inherit" />
+        </Backdrop>
+        <div className="heading">Create your own video</div>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
           <div className="Form-group">
             <label>Record or Upload Audio:</label>
-            <div >
+            <div>
               <div className="optionsgg">
-              <input
-                type="radio"
-                name="audioOption"
-                value="record"
-                onClick={() => handleradioButton("record")}
-              />{" "}
-              Record
-              <input
-                type="radio"
-                name="audioOption"
-                value="upload"
-                onClick={() => handleradioButton("upload")}
-              />{" "}
-              Upload
+                <input
+                  type="radio"
+                  name="audioOption"
+                  value="record"
+                  onClick={() => handleradioButton("record")}
+                />{" "}
+                Record
+                <input
+                  type="radio"
+                  name="audioOption"
+                  value="upload"
+                  onClick={() => handleradioButton("upload")}
+                />{" "}
+                Upload
               </div>
-              {console.log(option1, "option1")}
               {option1 === "record" && (
                 <div>
                   {" "}
                   <div>
                     <label htmlFor="record">Record Audio:</label>
+                    <input
+                      type="file"
+                      id="audio"
+                      name="audio"
+                      accept="audio/*"
+                      style={{ display: "none" }}
+                      ref={audioInputRef}
+                    />
                     {audioURL && (
                       <div>
                         {/* <button onClick={playAudio}>Play Audio</button> */}
                         <audio src={audioURL} controls />
-                        <button onClick={downloadAudio} className="download-button" >Download Audio</button>
+                        <button
+                          onClick={downloadAudio}
+                          className="download-button"
+                        >
+                          Download Audio
+                        </button>
                       </div>
                     )}
 
@@ -179,7 +226,7 @@ function CameraPage() {
               )}
               {option1 === "upload" && (
                 <div>
-                  <label class="choose-file-button" htmlFor="audio">
+                  <label className="choose-file-button" htmlFor="audio">
                     Choose file
                   </label>
                   <input
@@ -191,33 +238,35 @@ function CameraPage() {
                     style={{ display: "none" }}
                   />
 
-                  {audioURL && (
-                    <div>
-                      {/* <button
-                        onClick={handleAudioPlay}
-                        disabled={audioURL ? false : true}
-                      >
-                        Play
-                      </button> */}
-                      <audio src={audioURL} controls />
-                    </div>
-                  )}
+                  {audioURL && <AudioWaveform fileUrl={audioURL} />}
                 </div>
               )}
             </div>
           </div>
           <div className="Form-group">
-            <label>Theme:</label>
+            <div className="inline-flex">
+              <label>Artist:</label>{" "}
+              <input
+                type="text"
+                readOnly
+                value={theme.map((th) => myArray[th - 1].name).join(", ")}
+                style={{ pointerEvents: "none" }}
+                name="artist"
+              />
+            </div>
             <div className="Themes">
               {myArray.map((item) => (
-                <div className={item.id === theme ? "gg" : ""}>
+                <div
+                  key={item.id}
+                  className={theme.includes(item.id) ? "gg" : ""}
+                >
                   <div
                     // key={item.id}
                     className="box"
                     onClick={() => handleThemeClick(item.id)}
                   >
                     <img src={item.link} alt={item.name} />
-                    <div className="titlet">Theme Name: {item.name}</div>
+                    <div className="titlet">Artist Name: {item.name}</div>
                   </div>
                 </div>
               ))}
@@ -241,7 +290,6 @@ function CameraPage() {
                 checked={option === "music+theme"}
                 onChange={handleOptionSelect}
               />{" "}
-              {console.log(option)}
               Music + Theme
               <input
                 type="radio"
@@ -253,16 +301,27 @@ function CameraPage() {
               Theme
             </div>
           </div>
-          <div className="Form-group">
-            Upscale:{"   "}
+          <div className="Form-group inline-flex">
+            <label>Theme:</label>
             <input
+              style={{ verticalAlign: "middle" }}
+              type="text"
+              name="theme"
+            />
+          </div>
+          <div className="Form-group">
+            <label className="inline-label">Upscale:</label>
+            {"   "}
+            <input
+              style={{ verticalAlign: "middle" }}
               type="checkbox"
               checked={upscale}
               onChange={handleUpscaleCheckbox}
+              name="upscale"
             />
           </div>
           <button type="submit" className="recording-btn">
-            Create Music
+            Create Video
           </button>
         </form>
       </div>
