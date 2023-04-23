@@ -75,7 +75,7 @@ body{
   flex-wrap: wrap;
   justify-content: space-around;
   overflow-y: scroll;
-  height: 36em;
+  height: 45vh;
   width: 98%;
 }
 .Themes::-webkit-scrollbar {
@@ -199,4 +199,22 @@ input[type="radio"]::after {
 
 .download-button:hover {
   background-color: #3e8e41;
+}
+
+
+.Form-group .inline-label{
+  display:inline-block;
+}
+
+.inline-flex{
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: baseline;
+}
+
+.inline-flex input{
+  flex-grow: 1;
+  outline: transparent;
+  padding: 0.3rem 0.4rem;
 }
