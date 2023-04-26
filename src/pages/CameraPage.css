@@ -192,9 +192,8 @@ input[type="radio"]::after {
   font-size: 16px;
   border: none;
   cursor: pointer;
-  left: 77px;
+  left: 380px;
   position: relative;
-  top: 44px;
 }
 
 .download-button:hover {
