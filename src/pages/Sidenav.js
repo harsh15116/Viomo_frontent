@@ -45,7 +45,7 @@ function Sidenav({ func }) {
         </div>
         <div className="snCont2 snContent">
           <Link to="/">Home</Link>
-          <Link to="/camera">Camera</Link>
+          <Link to="/camera">Upload</Link>
           <Link to="/contact">About Us</Link>
           <Link onClick={(event) =>func(event,"Cipla")} to="/">Project Details</Link>
           {/* <Link to="/help">Help</Link> */}
