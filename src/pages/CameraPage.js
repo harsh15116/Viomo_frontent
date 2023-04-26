@@ -1,13 +1,14 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import "./CameraPage.css";
 import Sidenav from "./Sidenav";
 import { Backdrop } from "@mui/material";
 import { CircularProgress } from "@mui/material";
 import artist from "../assests/Artists";
 import AudioWaveform from "../components/AudioWave";
+import { bufferToWav, cropBuffer, urlToBuffer } from "../assests/assist";
 function CameraPage() {
   const [theme, setTheme] = useState([]);
-  const [option, setOption] = useState("music");
+  const [option, setOption] = useState("0");
   const [option1, setOption1] = useState("");
   const [upscale, setUpscale] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -37,12 +38,15 @@ function CameraPage() {
   //audio recorder function
   const [recording, setRecording] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
+  // const [cropURL, setCroppedURL] = useState(null);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [recordingButtonClass, setRecordingButtonClass] =
     useState("recording-button");
+  const [time, setTime] = useState([0, 0]);
 
   const chunks = [];
   const startRecording = () => {
+    setAudioURL(null);
     setRecordingButtonClass("recording-btn recording");
     navigator.mediaDevices
       .getUserMedia({ audio: true })
@@ -81,11 +85,6 @@ function CameraPage() {
     setRecordingButtonClass("recording-btn");
   };
 
-  const playAudio = () => {
-    const audio = new Audio(audioURL);
-    audio.play();
-  };
-
   const downloadAudio = () => {
     const link = document.createElement("a");
     link.href = audioURL;
@@ -99,44 +98,81 @@ function CameraPage() {
     const url = URL.createObjectURL(file);
     setAudioURL(url);
   };
+  console.log(time);
+  const base_url = "https://cacc-34-90-232-207.ngrok-free.app";
 
-  const handleAudioPlay = () => {
-    const audio = new Audio(audioURL);
-    audio.play();
-  };
-  // console.log(audioURL)
   const handleSubmit = async (event) => {
     event.preventDefault(); // prevent the default form submission behavior
     const formData = new FormData(event.target); // get the form data
-    const url = "https://5261-34-145-164-107.ngrok-free.app/save-audio-file"; // replace this with your URL
-    console.log(url);
-    setLoading(true);
-    await fetch(url, {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        // The response object contains metadata about the file
-        const filename = "temp.mp4";
-        // Use the blob() method to extract the file content as a Blob object
-        return response.blob().then((blob) => ({ filename, blob }));
-      })
-      .then((file) => {
-        // Use URL.createObjectURL() to generate a URL for the file content
-        const url = URL.createObjectURL(file.blob);
-        // Create an <a> element and programmatically click it to download the file
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = file.filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+    const url = `${base_url}/submit_form`; // replace this with your URL
+    formData.delete("audio");
+    urlToBuffer(audioURL)
+      .then((buffer) => {
+        const croppedBuffer = cropBuffer(buffer, time[0], time[1]);
+        const wavBytes = bufferToWav(croppedBuffer);
+        const wav = new Blob([wavBytes], { type: "audio/wav" });
+        const audioTemp = new File([wav], "my-audio-file.wav", {
+          type: "audio/wav",
+        });
+        console.log(audioTemp);
+        formData.append("audio", audioTemp, "temp.wav");
+        setLoading(true);
+        fetch(url, {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => {
+            const task = response.json();
+            
+            console.log(task);
+            return task;
+          })
+          .then((id) => {
+            console.log(id);
+            var refreshId = setInterval(function () {
+              const url = `${base_url}/get_video/${id}`;
+              // Wrap the fetch request inside a Promise
+              return new Promise((resolve, reject) => {
+                fetch(url)
+                  .then((response) => {
+                    if (response.headers.get("content-disposition")) {
+                      clearInterval(refreshId);
+                      const filename = "temp.mp4";
+                      return response
+                        .blob()
+                        .then((blob) => ({ filename, blob }));
+                    }
+                  })
+                  .then((file) => {
+                    resolve(file); // Resolve the Promise with the file
+                  })
+                  .catch((error) => {
+                    clearInterval(refreshId);
+                    reject(error); // Reject the Promise with the error
+                  });
+              });
+            }, 60000);
+          })
+          .then((file) => {
+            const url = URL.createObjectURL(file.blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = file.filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setLoading(false);
+          })
+          .catch((error) => {
+            setLoading(false);
+            console.log(error);
+          });
       })
       .catch((error) => {
         console.log(error);
       });
-    setLoading(false);
   };
+  console.log(loading);
 
   return (
     <>
@@ -180,11 +216,11 @@ function CameraPage() {
                       ref={audioInputRef}
                     />
                     {audioURL && (
-                      <div>
-                        {/* <button onClick={playAudio}>Play Audio</button> */}
+                      <div style={{ height: 0 }}>
                         <button
                           onClick={downloadAudio}
                           className="download-button"
+                          type="button"
                         >
                           Download Audio
                         </button>
@@ -196,6 +232,7 @@ function CameraPage() {
                         Recording...
                         <div className="Stop">
                           <button
+                            type="button"
                             className={recordingButtonClass}
                             onClick={stopRecording}
                           >
@@ -207,6 +244,7 @@ function CameraPage() {
                       <button
                         className="recording-btn"
                         onClick={startRecording}
+                        type="button"
                       >
                         Start Recording
                       </button>
@@ -239,7 +277,7 @@ function CameraPage() {
                 </div>
               )}
             </div>
-            {audioURL && <AudioWaveform fileUrl={audioURL} />}
+            {audioURL && <AudioWaveform fileUrl={audioURL} setTime={setTime} />}
           </div>
           <div className="Form-group">
             <div className="inline-flex">
@@ -276,24 +314,24 @@ function CameraPage() {
               <input
                 type="radio"
                 name="option"
-                value="music"
-                checked={option === "music"}
+                value="0"
+                checked={option === "0"}
                 onChange={handleOptionSelect}
               />{" "}
               Music
               <input
                 type="radio"
                 name="option"
-                value="music+theme"
-                checked={option === "music+theme"}
+                value="1"
+                checked={option === "1"}
                 onChange={handleOptionSelect}
               />{" "}
               Music + Theme
               <input
                 type="radio"
                 name="option"
-                value="theme"
-                checked={option === "theme"}
+                value="2"
+                checked={option === "2"}
                 onChange={handleOptionSelect}
               />{" "}
               Theme
