@@ -3,6 +3,7 @@ import Sidenav from './Sidenav';
 import './About.css';
 import  vishal from './vishal.jpg' ;
 import  harsh from './harsh.jpeg' ;
+import aryan from './aryan2.png'
 import  aman from './Aman.jpeg' ;
 import abtmbg from './abtusbg.png'
 import { useState, useEffect } from 'react';
@@ -38,12 +39,12 @@ function About() {
                     <img src={abtmbg} alt="" />
                 </div>
                 <div class="company-info">
-                    <span>PHOTOS <span class="our">FOR EVERYONE</span></span>
-                    <p>
+                    <span>VIDEOS <span class="our">FOR EVERYONE</span></span>
+                    {/* <p>
                         <b>Pico</b> is a India-based website dedicated for sharing stock photography under the Pico license. Pico allows
                         photographers to upload photos to its website, which are then curated by a team of photo editors. In Pico we are
                         aspiring to be one of the largest photography suppliers on the internet.
-                    </p>
+                    </p> */}
                 </div>
             </div>
             <div class="team"><span>MENTOR</span></div>
@@ -53,11 +54,10 @@ function About() {
                 <div class={loading ? "card-image loading" : "card-image"}>
                     <img src={vishal} alt="" /></div>
                     <div class="card-info">
-                        <h3 class="card-title "><span>Dr Vishal K <span class="yellow-surname">Singh</span></span></h3>
+                        <h3 class="card-title "><span>Dr Vishal Krishna <span class="yellow-surname">Singh</span></span></h3>
                         <p class="card-description ">
                             <span class="personal-info">
-                                <span class="info">Graphic Designing Head</span> <br />
-                                Pursuing IT Engineering (VIT Mumbai) <br />
+                                <span class="info">Project Supervisor</span> <br />
                                 Email: <a href="mailto:'vks@iiitl.ac.in'">vks@iiitl.ac.in</a>
                             </span>
                         </p>
@@ -88,7 +88,7 @@ function About() {
                         <h3 class="card-title "><span>Aman <span class="yellow-surname">Garg</span></span></h3>
                         <p class="card-description ">
                             <span class="personal-info">
-                                <span class="info">Full Stack Developer</span> <br />
+                                <span class="info">Web developing head</span> <br />
                                 {/* Pursuing IT Engineering (VIT Mumbai) <br /> */}
                                 Email: <a href="mailto:'lci2020031@iiitl.ac.in'">lci2020031@iiitl.ac.in</a>
                             </span>
@@ -110,7 +110,7 @@ function About() {
                         <h3 class="card-title "><span>Harsh <span class="yellow-surname">Singh</span></span></h3>
                         <p class="card-description ">
                             <span class="personal-info">
-                                <span class="info">Web Developing Head</span> <br />
+                                <span class="info">ML Ops</span> <br />
                                 {/* Pursuing IT Engineering (VIT Mumbai) <br /> */}
                                 Email: <a href="mailto:'lci2020003@iiitl.ac.in'">lci2020003@iiitl.ac.in</a>
                             </span>
@@ -125,12 +125,12 @@ function About() {
                     </div>
                 </div>
                 <div class="card">
-                    <div class={loading ? "card-image loading" : "card-image"} ><img src={aman} alt="" /></div>
+                    <div class={loading ? "card-image loading" : "card-image"} ><img src={aryan} alt="" /></div>
                     <div class="card-info">
                         <h3 class="card-title "><span>Aryan <span class="yellow-surname">Kumar</span></span></h3>
                         <p class="card-description ">
                             <span class="personal-info">
-                                <span class="info">Full Stack Developer</span> <br />
+                                <span class="info">Backend developer</span> <br />
                                  {/* <br /> */}
                                 Email: <a href="mailto:'lci2020004@iiitl.ac.in'">lci2020004@iiitl.ac.in</a>
                             </span>
