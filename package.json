@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@babel/helper-module-imports": "^7.21.4",
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@fortawesome/fontawesome-svg-core": "^6.3.0",
