@@ -6,6 +6,7 @@ import PrivateRoute from "./pages/PrivateRoute.page";
 import CameraPage from "./pages/CameraPage";
 import Help from "./pages/Help";
 import About from "./pages/About";
+import ProjectDetails from "./pages/ProjectDetails";
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
             <Route exact path="/camera" element={<CameraPage/>} />
             <Route exact path="/help" element={<Help/>} />
             <Route exact path="/contact" element={<About/>} />
+            <Route exact path="/details" element={<ProjectDetails/>} />
           </Route>
         </Routes>
       </UserProvider>

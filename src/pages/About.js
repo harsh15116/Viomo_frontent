@@ -3,7 +3,7 @@ import Sidenav from './Sidenav';
 import './About.css';
 import  vishal from './vishal.jpg' ;
 import  harsh from './harsh.jpeg' ;
-import aryan from './aryan2.png'
+import aryan from './aryan2.jpg'
 import  aman from './Aman.jpeg' ;
 import abtmbg from './abtusbg.png'
 import { useState, useEffect } from 'react';

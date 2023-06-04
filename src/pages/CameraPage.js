@@ -99,78 +99,68 @@ function CameraPage() {
     setAudioURL(url);
   };
   console.log(time);
-  const base_url = "https://cacc-34-90-232-207.ngrok-free.app";
+  const base_url = process.env.REACT_APP_API_URL;
 
   const handleSubmit = async (event) => {
     event.preventDefault(); // prevent the default form submission behavior
     const formData = new FormData(event.target); // get the form data
     const url = `${base_url}/submit_form`; // replace this with your URL
     formData.delete("audio");
-    urlToBuffer(audioURL)
-      .then((buffer) => {
-        const croppedBuffer = cropBuffer(buffer, time[0], time[1]);
-        const wavBytes = bufferToWav(croppedBuffer);
-        const wav = new Blob([wavBytes], { type: "audio/wav" });
-        const audioTemp = new File([wav], "my-audio-file.wav", {
-          type: "audio/wav",
-        });
-        console.log(audioTemp);
-        formData.append("audio", audioTemp, "temp.wav");
-        setLoading(true);
-        fetch(url, {
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => {
-            const task = response.json();
-            
-            console.log(task);
-            return task;
-          })
-          .then((id) => {
-            console.log(id);
-            var refreshId = setInterval(function () {
-              const url = `${base_url}/get_video/${id}`;
-              // Wrap the fetch request inside a Promise
-              return new Promise((resolve, reject) => {
-                fetch(url)
-                  .then((response) => {
-                    if (response.headers.get("content-disposition")) {
-                      clearInterval(refreshId);
-                      const filename = "temp.mp4";
-                      return response
-                        .blob()
-                        .then((blob) => ({ filename, blob }));
-                    }
-                  })
-                  .then((file) => {
-                    resolve(file); // Resolve the Promise with the file
-                  })
-                  .catch((error) => {
-                    clearInterval(refreshId);
-                    reject(error); // Reject the Promise with the error
-                  });
-              });
-            }, 60000);
-          })
-          .then((file) => {
-            const url = URL.createObjectURL(file.blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = file.filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setLoading(false);
-          })
-          .catch((error) => {
-            setLoading(false);
-            console.log(error);
-          });
-      })
-      .catch((error) => {
-        console.log(error);
+    try {
+      const buffer = await urlToBuffer(audioURL);
+      const croppedBuffer = cropBuffer(buffer, time[0], time[1]);
+      const wavBytes = bufferToWav(croppedBuffer);
+      const wav = new Blob([wavBytes], { type: "audio/wav" });
+      const audioTemp = new File([wav], "my-audio-file.wav", {
+        type: "audio/wav",
       });
+      console.log(audioTemp);
+      formData.append("audio", audioTemp, "temp.wav");
+      setLoading(true);
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData,
+      });
+      const task = await response.json();
+      console.log(task);
+      const id = task.id;
+      console.log(id);
+      var refreshId = setInterval(async function () {
+        const url = `${base_url}/get_video/${id}`;
+        try {
+          const response = await fetch(url, { method: "POST" });
+          console.log(response);
+          for (var pair of response.headers.entries()) {
+            console.log(pair[0] + ": " + pair[1]);
+            if (pair[1] === "video/mp4") {
+              // key I'm looking for in this instance
+              clearInterval(refreshId);
+              console.log("k");
+              const filename = "temp.mp4";
+              const file = await response.blob();
+              const url = URL.createObjectURL(file);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = filename;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              setLoading(false);
+            }
+          }
+          // if (response.headers.get("content-disposition")) {
+          //   console.log("hi");
+          // }
+          console.log("Night");
+        } catch (error) {
+          clearInterval(refreshId);
+          setLoading(false);
+          console.log(error);
+        }
+      }, 60000);
+    } catch (error) {
+      console.log(error);
+    }
   };
   console.log(loading);
 
