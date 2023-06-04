@@ -3,12 +3,7 @@ import "./Sidenav.css";
 import { UserContext } from '../contexts/user.context';
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  solid,
-  regular,
-  brands,
-  icon,
-} from "@fortawesome/fontawesome-svg-core/import.macro";
+import { faXmark,faBars } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 
 function showMenu() {
@@ -33,14 +28,14 @@ function Sidenav({ func }) {
   return (
     <div>
       <div className="hamburg" onClick={showMenu}>
-        <FontAwesomeIcon icon={solid("bars")} />
+        <FontAwesomeIcon icon={faBars} />
       </div>
       <div className="sidenav" id="navcont">
         <div className="snCont1 snContent">
           <p>Voimo..</p>
           <div className="cross" onClick={closeMenu}>
             {/* <i class="fas fa-regular fa-xmark"></i> */}
-            <FontAwesomeIcon icon={solid("xmark")} />
+            <FontAwesomeIcon icon={faXmark} />
           </div>
         </div>
         <div className="snCont2 snContent">
