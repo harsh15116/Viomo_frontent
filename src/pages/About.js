@@ -4,6 +4,7 @@ import './About.css';
 import  vishal from './vishal.jpg' ;
 import  harsh from './harsh.jpeg' ;
 import aryan from './aryan2.jpg'
+import  nitesh from './Nitesh.jpeg' ;
 import  aman from './Aman.jpeg' ;
 import abtmbg from './abtusbg.png'
 import { useState, useEffect } from 'react';
@@ -83,23 +84,20 @@ function About() {
 
 
                     <div class={loading ? "card-image loading" : "card-image"}>
-                    <img src= {aman} alt="" /></div>
+                    <img src={nitesh} alt="" /></div>
                     <div class="card-info">
-                        <h3 class="card-title "><span>Aman <span class="yellow-surname">Garg</span></span></h3>
+                        <h3 class="card-title "><span>Nitesh <span class="yellow-surname">Singh</span></span></h3>
                         <p class="card-description ">
                             <span class="personal-info">
-                                <span class="info">Web developing head</span> <br />
+                                <span class="info">Web developer</span> <br />
                                 {/* Pursuing IT Engineering (VIT Mumbai) <br /> */}
-                                Email: <a href="mailto:'lci2020031@iiitl.ac.in'">lci2020031@iiitl.ac.in</a>
+                                Email: <a href="mailto:'lcs2020063@iiitl.ac.in'">lcs2020063@iiitl.ac.in</a>
                             </span>
                         </p>
                         <div class="card-mediaIcons">
                             <a href="#" target="on_blank"><i class="fab fa-facebook-f"></i></a>
-                            <a href="https://www.linkedin.com/in/aman-garg-5a0767203/" target="on_blank"><i><img
+                            <a href="https://www.linkedin.com/in/nitesh-singh-761b77202/" target="on_blank"><i><img
                                 src="https://www.freeiconspng.com/uploads/linkedin-logo-3.png" alt="Pico" /></i></a>
-                            <a href="https://www.instagram.com/yashfalke77/" target="on_blank">
-                                <i class="fab fa-instagram"></i></a>
-
                         </div>
                     </div>
                 </div>
@@ -140,6 +138,24 @@ function About() {
                             <a href="" target="on_blank"><i><img
                                 src="https://www.freeiconspng.com/uploads/linkedin-logo-3.png" alt="Pico" /></i></a>
                             <a href="https://www.linkedin.com/in/aryan-kumar-795528202/" target="on_blank"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class={loading ? "card-image loading" : "card-image"} ><img src={aman} alt="" /></div>
+                    <div class="card-info">
+                        <h3 class="card-title "><span>Aman <span class="yellow-surname">Garg</span></span></h3>
+                        <p class="card-description ">
+                            <span class="personal-info">
+                                <span class="info">Designer</span> <br />
+                                 {/* <br /> */}
+                                Email: <a href="mailto:'lci2020031iiitl.ac.in'">lci2020031@iiitl.ac.in</a>
+                            </span>
+                        </p>
+                        <div class="card-mediaIcons">
+                            <a href="#" target="on_blank"><i class="fab fa-facebook-f"></i></a>
+                            <a href="https://www.linkedin.com/in/aman-garg-5a0767203/" target="on_blank"><i><img
+                                src="https://www.freeiconspng.com/uploads/linkedin-logo-3.png" alt="Pico" /></i></a>
                         </div>
                     </div>
                 </div>
