@@ -217,3 +217,63 @@ input[type="radio"]::after {
   outline: transparent;
   padding: 0.3rem 0.4rem;
 }
+
+/* css for sample images */
+
+.SampleImages h3{
+  justify-content: flex-start;
+  display: flex;
+  margin-left: 1em;
+  margin-bottom: 1em;
+}
+.SampleImages {
+  margin-top: 20px;
+  opacity: 0; 
+  animation: fadeIn 1s forwards; 
+}
+
+.ImageContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  /* grid-template-rows: repeat(3, 100px); */
+  width: 100%;
+  padding: 1em;
+  margin-top: 2em;
+  justify-content: center;
+  gap: 10px;
+}
+
+.ImageContainer img {
+  max-width: 15em;
+  height: 12em;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.ImageContainer img:hover {
+  transform: scale(1.1); 
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+.RegenerateContinueButtons{
+  display: flex;
+  gap: 3em;
+  margin-left: 0.5em;
+  margin-bottom: 2em;
+  margin-top: 2em;
+  justify-content: flex-start;
+
+}
+.modlll{
+  margin-left: 15em;
+  background: #fffdfd;
+  width: 79%;
+  height: 80%;
+  box-shadow: 0px 3px 28px rgba(0, 0, 0, 0.5);
+  margin-top: 5em;
+}

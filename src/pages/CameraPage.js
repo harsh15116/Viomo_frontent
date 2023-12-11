@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./CameraPage.css";
 import Sidenav from "./Sidenav";
 import { Backdrop } from "@mui/material";
@@ -6,6 +6,8 @@ import { CircularProgress } from "@mui/material";
 import artist from "../assests/Artists";
 import AudioWaveform from "../components/AudioWave";
 import { bufferToWav, cropBuffer, urlToBuffer } from "../assests/assist";
+import Modal from "react-modal";
+
 function CameraPage() {
   const [theme, setTheme] = useState([]);
   const [option, setOption] = useState("0");
@@ -98,14 +100,93 @@ function CameraPage() {
     const url = URL.createObjectURL(file);
     setAudioURL(url);
   };
-  console.log(time);
   const base_url = process.env.REACT_APP_API_URL;
+
+  Modal.setAppElement("#root");
+  const [sampleImages, setSampleImages] = useState([]);
+  const [gid, setGid] = useState("");
+
+  const checkSampleImages = async (id, sampleLoop) => {
+    try {
+      const response = await fetch(`${base_url}/get_samples/${id}`, {
+        method: "POST",
+      });
+      if (response.ok) {
+        const images = await response.json();
+        if (images && images.length > 0) {
+          setSampleImages(images);
+          console.log(images);
+          setLoading(false);
+          clearInterval(sampleLoop);
+          openModal();
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const checkVideo = async (videoInterval) => {
+    try {
+      const response = await fetch(`${base_url}/get_video/${gid}`, {
+        method: "POST",
+      });
+      if (response.ok) {
+        for (var pair of response.headers.entries()) {
+          if (pair[1] === "video/mp4") {
+            const filename = "temp.mp4";
+            const file = await response.blob();
+            const url = URL.createObjectURL(file);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setLoading(false);
+            clearInterval(videoInterval);
+          }
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const imageRouteCalls = async () => {
+    setLoading(true);
+    try {
+      await fetch(`${base_url}/gen_samples/${gid}`, {
+        method: "POST",
+      });
+      let imageInterval = setInterval(() => {
+        checkSampleImages(gid, imageInterval);
+      }, 60000);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const videoRouteCalls = async () => {
+    setLoading(true);
+    try {
+      await fetch(`${base_url}/gen_video/${gid}`, {
+        method: "POST",
+      });
+      let videoInterval = setInterval(() => {
+        checkVideo(videoInterval);
+      }, 60000);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault(); // prevent the default form submission behavior
     const formData = new FormData(event.target); // get the form data
     const url = `${base_url}/submit_form`; // replace this with your URL
     formData.delete("audio");
+    setSampleImages([]);
     try {
       const buffer = await urlToBuffer(audioURL);
       const croppedBuffer = cropBuffer(buffer, time[0], time[1]);
@@ -114,7 +195,6 @@ function CameraPage() {
       const audioTemp = new File([wav], "my-audio-file.wav", {
         type: "audio/wav",
       });
-      console.log(audioTemp);
       formData.append("audio", audioTemp, "temp.wav");
       setLoading(true);
       const response = await fetch(url, {
@@ -122,47 +202,50 @@ function CameraPage() {
         body: formData,
       });
       const task = await response.json();
-      console.log(task);
       const id = task.id;
-      console.log(id);
-      var refreshId = setInterval(async function () {
-        const url = `${base_url}/get_video/${id}`;
-        try {
-          const response = await fetch(url, { method: "POST" });
-          console.log(response);
-          for (var pair of response.headers.entries()) {
-            console.log(pair[0] + ": " + pair[1]);
-            if (pair[1] === "video/mp4") {
-              // key I'm looking for in this instance
-              clearInterval(refreshId);
-              console.log("k");
-              const filename = "temp.mp4";
-              const file = await response.blob();
-              const url = URL.createObjectURL(file);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = filename;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              setLoading(false);
-            }
-          }
-          // if (response.headers.get("content-disposition")) {
-          //   console.log("hi");
-          // }
-          console.log("Night");
-        } catch (error) {
-          clearInterval(refreshId);
-          setLoading(false);
-          console.log(error);
-        }
+      setGid(id);
+
+      let sampleLoop = setInterval(() => {
+        checkSampleImages(id, sampleLoop);
       }, 60000);
+
+      // console.log("after loop call one", sampleLoop);
     } catch (error) {
+      setLoading(false);
       console.log(error);
     }
   };
+
   console.log(loading);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+  const handleGenerateButtonClick = (action) => {
+    if (action === "regenerate") {
+      setSampleImages([]);
+      closeModal();
+      imageRouteCalls();
+    } else if (action === "continue") {
+      videoRouteCalls();
+      closeModal();
+    }
+  };
+  // useEffect(() => {
+  //   return () => {
+  //     if (sampleImageInterval) {
+  //       clearInterval(sampleImageInterval);
+  //     }
+  //     if (videoCheckInterval) {
+  //       clearInterval(videoCheckInterval);
+  //     }
+  //   };
+  // }, []);
 
   return (
     <>
@@ -351,6 +434,43 @@ function CameraPage() {
           </button>
         </form>
       </div>
+      {sampleImages.length > 0 && (
+        <div>
+          <Modal
+            isOpen={isModalOpen}
+            onRequestClose={closeModal}
+            contentLabel="Options Modal"
+            className="modlll"
+          >
+            <div className="SampleImages">
+              <h3>Sample Images:</h3>
+              <div className="ImageContainer">
+                {sampleImages.map((image, index) => (
+                  <img
+                    key={index}
+                    src={`data:${image.media_type};base64,${image.content}`}
+                    alt={`Sample  ${index}`}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="RegenerateContinueButtons">
+              <button
+                className="recording-btn"
+                onClick={() => handleGenerateButtonClick("regenerate")}
+              >
+                Regenerate
+              </button>
+              <button
+                className="recording-btn"
+                onClick={() => handleGenerateButtonClick("continue")}
+              >
+                Continue
+              </button>
+            </div>
+          </Modal>
+        </div>
+      )}
     </>
   );
 }
